@@ -1,0 +1,182 @@
+#Oscar Cruz
+#11/22/2020
+
+# import the sqlite3 database module
+
+import sqlite3
+
+# create a connection to the database file
+
+conn = sqlite3.connect("myDatabase.db")
+
+# create a cursor that we will use to move through the database
+
+cursor = conn.cursor()
+
+#start a new a database
+cursor.execute("DROP TABLE IF EXISTS employee;")
+
+# note that primary keys are automatically created in sqlit3 and referenced as rowid
+
+cursor.execute("CREATE TABLE employee (first_name TEXT, last_name TEXT, email_address TEXT, hourly_rate TEXT, department_name TEXT)")
+
+cursor.execute("INSERT INTO employee VALUES (\"Novack\", \"Djokovic\", \"novackNole@gmail.com\",\"12.50\",\"History\")")
+
+cursor.execute("INSERT INTO employee VALUES (\"Rafael\", \"Nadal\", \"rafaNadal@gmail.com\",\"20\",\"English\")")
+
+cursor.execute("INSERT INTO employee VALUES (\"Dominic\", \"Thiem\", \"domThiem@gmail.com\",\"15\",\"Physics\")")
+
+cursor.execute("INSERT INTO employee VALUES (\"Daniil\", \"Medvedev\", \"danniilMed@gmail.com\",\"14.45\",\"Sciences\")")
+
+cursor.execute("INSERT INTO employee VALUES (\"Roger\", \"Federer\", \"rf@gmail.com\",\"15\",\"Psychology\")")
+
+cursor.execute("INSERT INTO employee VALUES (\"Stefanos\", \"Tsitsipas\", \"stfTsit@gmail.com\",\"35\",\"Psychology\")")
+
+cursor.execute("INSERT INTO employee VALUES (\"Alexander\", \"Sverev\", \"alexSv@gmail.com\",\"25\",\"English\")")
+
+cursor.execute("INSERT INTO employee VALUES (\"Andrey\", \"Rublev\", \"andyRublev@gmail.com\",\"30\",\"Physics\")")
+
+cursor.execute("INSERT INTO employee VALUES (\"Diego\", \"Schwar\", \"diegoSc@gmail.com\",\"12.50\",\"Sciences\")")
+
+cursor.execute("INSERT INTO employee VALUES (\"Mateo\", \"Berrettini\", \"matBerretooo@gmail.com\",\"19\",\"Engineering\")")
+
+cursor.execute("SELECT rowid, first_name, last_name, email_address, hourly_rate, department_name FROM employee")
+
+
+#function to add values to the fields of the employee table
+def list_add():
+
+
+  first_name = input("First Name: ")
+  last_name = input("Last Name: ")
+  email_address = input("Email: ")
+  hourly_rate = input("Hourly Rate: ")
+  department_name = input("Department Name: ")
+  
+  #instering the values to the fields
+  sql = """
+  INSERT INTO employee (first_name, last_name, email_address, hourly_rate, department_name)
+  VALUES (?,?,?,?,?)
+  """
+# execute the query with the input variable names
+  cursor.execute(sql, (first_name, last_name, email_address, hourly_rate, department_name))
+  print("Employee added. Thank you.")
+  print()
+
+# Function that show all the data from the employee table
+def list_all():
+
+  # store the results of a the query to a list called employees
+
+  cursor.execute("SELECT rowid, first_name, last_name, email_address, hourly_rate, department_name FROM employee")
+  employees = cursor.fetchall()
+
+  print("All employees in the database: ")
+  print()
+  
+  # use string format to create a nice output with spacing for the results
+  print("{0:<5} {1:<15} {2:<10} {3:<35} {4:<15} {5:<10}".format("Item", "First Name", "Last Name", "Email", "Hourly Rate", "Department"))
+
+  #loop through the results of the query
+  for this_employee in employees:
+    print("{0:<5} {1:<15} {2:<10} {3:<35} {4:<15} {5:<10}".format(this_employee[0], this_employee[1], this_employee[2], this_employee[3], this_employee[4], this_employee[5]))
+
+  print()
+
+#search function using last name from user input(case sensitive)
+def list_search():
+
+  employee_last = input("Please type the last name (case sensitive): ")
+  print()
+
+  cursor.execute("SELECT rowid, first_name, last_name, email_address, hourly_rate, department_name FROM employee WHERE last_name = ?", (employee_last,))
+  employees = cursor.fetchall()
+
+  print("The employees with that last name are: ")
+  print()
+  print("{0:<5} {1:<15} {2:<10} {3:<35} {4:<15} {5:<10}".format("Item", "First Name", "Last Name", "Email", "Hourly Rate", "Department"))
+
+  for this_employee in employees:
+    print("{0:<5} {1:<15} {2:<10} {3:<35} {4:<15} {5:<10}".format(this_employee[0], this_employee[1], this_employee[2], this_employee[3], this_employee[4], this_employee[5]))
+  print()
+
+#update funciton by last_name
+def list_update():
+  
+  #find the user by last name
+  employee_last = input("Please type employee last name (case sensitive): ")
+  #new variable (update hourly rate)
+  hourly_update = input("Please type the new hourly rate: ")
+  print()
+  #call Update on the table to change variable based on user input
+  cursor.execute("UPDATE employee set hourly_rate = ? WHERE last_name = ?", (hourly_update, employee_last))
+
+  conn.commit()
+  print("Employee hourly rate changed succesfully")
+
+#function that deletes by last name(case sensitive)
+def list_delete():
+
+  print("PLease type the last name of the employee you want to delete from the database")
+  employee_delete = input("Last name (case sensitive): ")
+
+  #find the last name and call DELETE
+  cursor.execute("DELETE FROM employee WHERE last_name = ?", (employee_delete,))
+
+  conn.commit()
+  print("Employee deleted succesfully from database")
+
+#displays welcome message
+def welcome_message():
+
+  print("Welcome to the employee stats database")
+  print("Enjoy!")
+  print()
+
+
+#main function that displays commands, functions and user inputs
+def main():
+
+  welcome_message()
+  while True:
+
+    print("Commands:")
+    print("Add an employee: a")
+    print("View employees details: v")    
+    print("Search employee: s")
+    print("Update hourly rate: u")
+    print("Delete an employee: d")
+    print("Quit the database: q")
+    print()
+
+    #user input that call de functions
+    choice = input("Type a command: ").lower()
+    print()
+
+    #choices that call the functions
+    if choice=="q":
+      break
+    elif choice=="v":
+      list_all()
+    elif choice=="a":
+      list_add()
+    elif choice=="s":
+      list_search()
+    elif choice=="d":
+      list_delete()
+    elif choice=="u":
+      list_update()
+    else:
+      print("Invalid choice, please choose again\n")
+
+  print("Thank you using the database")
+  print("Hope this works for something")
+
+if __name__ == '__main__':
+    main()
+
+conn.commit()
+
+# close the connection
+
+conn.close()
